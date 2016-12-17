@@ -7,11 +7,11 @@ public class MapConfiguration extends AbstractConfiguration {
     private Map<String, String> valueMap;
 
     public MapConfiguration(String name, Map<String, String> valueMap) {
-        this(null, name, valueMap);
+        this(name, valueMap, null);
     }
 
-    public MapConfiguration(Configuration baseConfig, String name, Map<String, String> valueMap) {
-        super(baseConfig, name);
+    public MapConfiguration(String name, Map<String, String> valueMap, Configuration baseConfig) {
+        super(name, baseConfig);
         this.valueMap = valueMap;
         this.doReload();
     }

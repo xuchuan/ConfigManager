@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface Configuration {
+public interface Configuration extends Cloneable {
     String getProperty(String key);
 
     String getProperty(String key, String defaultValue);
@@ -70,4 +70,6 @@ public interface Configuration {
     Map<String, ConfigItem> getItemMap();
 
     void reload();
+
+    Configuration clone();
 }

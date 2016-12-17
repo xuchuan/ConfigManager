@@ -9,11 +9,11 @@ public class PropertyFileConfiguration extends AbstractConfiguration {
     private File configFile;
 
     public PropertyFileConfiguration(File configFile) {
-        this(null, configFile);
+        this(configFile, null);
     }
 
-    public PropertyFileConfiguration(Configuration baseConfig, File configFile) {
-        super(baseConfig, configFile.getPath() + File.separator + configFile.getName());
+    public PropertyFileConfiguration(File configFile, Configuration baseConfig) {
+        super(configFile.getPath() + File.separator + configFile.getName(), baseConfig);
         Utils.checkNotNull("configFile", configFile);
         this.configFile = configFile;
     }

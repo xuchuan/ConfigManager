@@ -7,6 +7,7 @@ public class SystemEnvironmentConfiguration extends AbstractConfiguration {
 
     public SystemEnvironmentConfiguration(Configuration baseConfig) {
         super("System Environment", baseConfig);
+        doReload();
     }
 
     protected void doReload() {

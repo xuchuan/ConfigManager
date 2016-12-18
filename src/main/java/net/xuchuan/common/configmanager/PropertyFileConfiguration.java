@@ -16,6 +16,7 @@ public class PropertyFileConfiguration extends AbstractConfiguration {
         super(configFile.getPath() + File.separator + configFile.getName(), baseConfig);
         Utils.checkNotNull("configFile", configFile);
         this.configFile = configFile;
+        doReload();
     }
 
     protected void doReload() {

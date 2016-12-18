@@ -213,7 +213,12 @@ public abstract class AbstractConfiguration implements Configuration {
     }
 
     public Set<String> getKeySet() {
-        return new HashSet<String>(this.itemMap.keySet());
+        if (this.baseConfig == null) {
+            return new HashSet<String>(this.itemMap.keySet());
+        }
+        Set<String> keySet = this.baseConfig.getKeySet();
+        keySet.addAll(this.itemMap.keySet());
+        return keySet;
     }
 
     public Configuration getBaseConfig() {
@@ -225,7 +230,12 @@ public abstract class AbstractConfiguration implements Configuration {
     }
 
     public Map<String, ConfigItem> getItemMap() {
-        return new HashMap<String, ConfigItem>(this.itemMap);
+        if (this.baseConfig == null) {
+            return new HashMap<String, ConfigItem>(this.itemMap);
+        }
+        Map<String, ConfigItem> itemMap = this.baseConfig.getItemMap();
+        itemMap.putAll(this.itemMap);
+        return itemMap;
     }
 
     public void reload() {
@@ -237,7 +247,7 @@ public abstract class AbstractConfiguration implements Configuration {
 
     public Configuration clone() {
         try {
-            AbstractConfiguration newConfig =  (AbstractConfiguration) super.clone();
+            AbstractConfiguration newConfig = (AbstractConfiguration) super.clone();
             newConfig.baseConfig = baseConfig.clone(); // base config MUST be cloned after self clone
             return newConfig;
         } catch (CloneNotSupportedException e) {

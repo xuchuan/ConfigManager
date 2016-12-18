@@ -13,7 +13,7 @@ public class MapConfiguration extends AbstractConfiguration {
     public MapConfiguration(String name, Map<String, String> valueMap, Configuration baseConfig) {
         super(name, baseConfig);
         this.valueMap = valueMap;
-        this.doReload();
+        doReload();
     }
 
     public MapConfigurationBuilder getBuilder() {

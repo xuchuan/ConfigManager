@@ -7,6 +7,7 @@ public class SystemPropertiesConfiguration extends AbstractConfiguration {
 
     public SystemPropertiesConfiguration(Configuration baseConfig) {
         super("System properties", baseConfig);
+        doReload();
     }
 
     protected void doReload() {

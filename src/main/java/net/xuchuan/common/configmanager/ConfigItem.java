@@ -9,9 +9,13 @@ public class ConfigItem {
     private Date lastUpdateTime;
 
     public ConfigItem(String key, String value, String source, Date lastUpdateTime) {
-        this.key = key;
-        this.value = value;
-        this.source = source;
+        Utils.checkNotEmptyStringAfterTrim("key", key);
+        Utils.checkNotNull("key", key);
+        Utils.checkNotEmptyStringAfterTrim("source", source);
+        Utils.checkNotNull("lastUpdateTime", lastUpdateTime);
+        this.key = key.trim();
+        this.value = value.trim();
+        this.source = source.trim();
         this.lastUpdateTime = lastUpdateTime;
     }
 

@@ -24,20 +24,21 @@ Apache Commons Configuration allows concurrent accesses from multiple threads by
         config = new PropertyFileConfiguration(new File("conf.prop"));
 
         // Read from memory
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("prop1", "value1");
-        map.put("prop2", "value2");
-        config = new MapConfiguration("memory", map);
+        config = new MapConfiguration("memory",
+                new ValueMapBuilder()
+                        .setProperty("prop1", "value1")
+                        .setProperty("prop2", "value2")
+                        .getValueMap());
 
-        // Read from memory with a MapConfigurationBuilder
-        config = new MapConfigurationBuilder("memory")
+        // Update with a ValueMapBuilder and reload
+        new ValueMapBuilder(config.getValueMap())
                 .setIntProperty("intProp", 1234)
                 .setProperty("prop1", "value1")
-                .setIntArrayProperty("int[]", new int[]{1, 2, 3, 4})
-                .build();
+                .setIntArrayProperty("int[]", new int[]{1, 2, 3, 4});
+        config.reload();
 
         // A typical composite configuration
-        config = new MapConfiguration("hotfix", map,
+        config = new MapConfiguration("hotfix",
                 new PropertyFileConfiguration(new File("conf.prop"),
                         new SystemPropertiesConfiguration(
                                 new SystemEnvironmentConfiguration())));

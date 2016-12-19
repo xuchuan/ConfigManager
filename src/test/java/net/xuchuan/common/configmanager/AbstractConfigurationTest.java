@@ -8,14 +8,18 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AbstractConfigurationTest {
     private AbstractConfiguration configuration;
+    private Map<String, String> valueMap;
+    private Map<String, String> otherMap;
 
     @Before
     public void setUp() {
-        Map<String, String> valueMap = new HashMap<String, String>();
+        valueMap = new ConcurrentHashMap<String, String>();
         valueMap.put("String", "abc");
         valueMap.put("int", "1234");
         valueMap.put("long", "12345678900");
@@ -31,7 +35,37 @@ public class AbstractConfigurationTest {
         valueMap.put("List<Long>", "0,1,2,3,4,12345678900");
         valueMap.put("List<Float>", "0.1,1.2,2.3,3.4,4.5");
         valueMap.put("List<Double>", "0.1,1.2,2.3,3.4,4.5");
-        this.configuration = new MapConfiguration("test", valueMap);
+        otherMap = new HashMap<String, String>();
+        otherMap.put("other", "otherValue");
+        configuration = new MapConfiguration("test", valueMap,
+                new MapConfiguration("other", otherMap));
+    }
+
+    @Test
+    public void testConstructor() {
+        Assert.assertEquals("test", configuration.getName());
+        Assert.assertNotNull(configuration.getBaseConfig());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testConstructor_NullName() {
+        new MapConfiguration(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor_EmptyName() {
+        new MapConfiguration("");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor_WhiteSpaceName() {
+        new MapConfiguration(" \t");
+    }
+
+    @Test
+    public void testConstructor_NullBaseConfig() {
+        configuration = new MapConfiguration("test");
+        Assert.assertNull(configuration.getBaseConfig());
     }
 
     @Test
@@ -39,13 +73,18 @@ public class AbstractConfigurationTest {
         Assert.assertEquals("abc", configuration.getProperty("String"));
     }
 
+    @Test
+    public void testGetProperty_FromBaseConfig() {
+        Assert.assertEquals("otherValue", configuration.getProperty("other"));
+    }
+
     @Test(expected = NullPointerException.class)
-    public void testGetPropertyNullKey() {
+    public void testGetProperty_NullKey() {
         configuration.getProperty(null);
     }
 
     @Test(expected = NoSuchPropertyException.class)
-    public void testGetPropertyInvalidKey() {
+    public void testGetProperty_InvalidKey() {
         configuration.getProperty("invalid");
     }
 
@@ -55,12 +94,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetPropertyWithDefaultNullKey() {
+    public void testGetPropertyWithDefault_NullKey() {
         configuration.getProperty(null);
     }
 
     @Test
-    public void testGetPropertyWithDefaultInvalidKey() {
+    public void testGetPropertyWithDefault_InvalidKey() {
         Assert.assertEquals("", configuration.getProperty("invalid", ""));
     }
 
@@ -70,18 +109,13 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetIntPropertyNullKey() {
+    public void testGetIntProperty_NullKey() {
         configuration.getIntProperty(null);
     }
 
     @Test(expected = NoSuchPropertyException.class)
-    public void testGetIntPropertyInvalidKey() {
+    public void testGetIntProperty_InvalidKey() {
         configuration.getIntProperty("invalid");
-    }
-
-    @Test
-    public void testGetLongProperty() {
-        Assert.assertEquals(12345678900L, configuration.getLongProperty("long"));
     }
 
     @Test
@@ -90,22 +124,27 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetIntPropertyWithDefaultNullKey() {
+    public void testGetIntPropertyWithDefault_NullKey() {
         configuration.getIntProperty(null);
     }
 
     @Test
-    public void testGetIntPropertyWithDefaultInvalidKey() {
+    public void testGetIntPropertyWithDefault_InvalidKey() {
         Assert.assertEquals(0, configuration.getIntProperty("invalid", 0));
     }
 
+    @Test
+    public void testGetLongProperty() {
+        Assert.assertEquals(12345678900L, configuration.getLongProperty("long"));
+    }
+
     @Test(expected = NullPointerException.class)
-    public void testGetLongPropertyNullKey() {
+    public void testGetLongProperty_NullKey() {
         configuration.getLongProperty(null);
     }
 
     @Test(expected = NoSuchPropertyException.class)
-    public void testGetLongPropertyInvalidKey() {
+    public void testGetLongProperty_InvalidKey() {
         configuration.getLongProperty("invalid");
     }
 
@@ -115,12 +154,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetLongPropertyWithDefaultNullKey() {
+    public void testGetLongPropertyWithDefault_NullKey() {
         configuration.getLongProperty(null);
     }
 
     @Test
-    public void testGetLongPropertyWithDefaultInvalidKey() {
+    public void testGetLongPropertyWithDefault_InvalidKey() {
         Assert.assertEquals(0, configuration.getLongProperty("invalid", 0));
     }
 
@@ -130,12 +169,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetFloatPropertyNullKey() {
+    public void testGetFloatProperty_NullKey() {
         configuration.getFloatProperty(null);
     }
 
     @Test(expected = NoSuchPropertyException.class)
-    public void testGetFloatPropertyInvalidKey() {
+    public void testGetFloatProperty_InvalidKey() {
         configuration.getFloatProperty("invalid");
     }
 
@@ -145,7 +184,7 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetFloatPropertyWithDefaultNullKey() {
+    public void testGetFloatPropertyWithDefault_NullKey() {
         configuration.getFloatProperty(null);
     }
 
@@ -160,12 +199,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetDoublePropertyNullKey() {
+    public void testGetDoubleProperty_NullKey() {
         configuration.getDoubleProperty(null);
     }
 
     @Test(expected = NoSuchPropertyException.class)
-    public void testGetDoublePropertyInvalidKey() {
+    public void testGetDoubleProperty_InvalidKey() {
         configuration.getDoubleProperty("invalid");
     }
 
@@ -175,12 +214,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetDoublePropertyWithDefaultNullKey() {
+    public void testGetDoublePropertyWithDefault_NullKey() {
         configuration.getDoubleProperty(null);
     }
 
     @Test
-    public void testGetDoublePropertyWithDefaultInvalidKey() {
+    public void testGetDoublePropertyWithDefault_InvalidKey() {
         Assert.assertEquals(0, configuration.getDoubleProperty("invalid", 0), 1e-8);
     }
 
@@ -190,12 +229,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetStringArrayPropertyNullKey() {
+    public void testGetStringArrayProperty_NullKey() {
         configuration.getStringArrayProperty(null);
     }
 
     @Test(expected = NoSuchPropertyException.class)
-    public void testGetStringArrayPropertyInvalidKey() {
+    public void testGetStringArrayProperty_InvalidKey() {
         configuration.getStringArrayProperty("invalid");
     }
 
@@ -206,12 +245,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetStringArrayPropertyWithDefaultNullKey() {
+    public void testGetStringArrayPropertyWithDefault_NullKey() {
         configuration.getStringArrayProperty(null);
     }
 
     @Test
-    public void testGetStringArrayPropertyWithDefaultInvalidKey() {
+    public void testGetStringArrayPropertyWithDefault_InvalidKey() {
         Assert.assertArrayEquals(new String[0], configuration.getStringArrayProperty("invalid", new String[0]));
     }
 
@@ -221,12 +260,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetIntArrayPropertyNullKey() {
+    public void testGetIntArrayProperty_NullKey() {
         configuration.getIntArrayProperty(null);
     }
 
     @Test(expected = NoSuchPropertyException.class)
-    public void testGetIntArrayPropertyInvalidKey() {
+    public void testGetIntArrayProperty_InvalidKey() {
         configuration.getIntArrayProperty("invalid");
     }
 
@@ -236,12 +275,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetIntArrayPropertyWithDefaultNullKey() {
+    public void testGetIntArrayPropertyWithDefault_NullKey() {
         configuration.getIntArrayProperty(null);
     }
 
     @Test
-    public void testGetIntArrayPropertyWithDefaultInvalidKey() {
+    public void testGetIntArrayPropertyWithDefault_InvalidKey() {
         Assert.assertArrayEquals(new int[0], configuration.getIntArrayProperty("invalid", new int[0]));
     }
 
@@ -251,12 +290,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetLongArrayPropertyNullKey() {
+    public void testGetLongArrayProperty_NullKey() {
         configuration.getLongArrayProperty(null);
     }
 
     @Test(expected = NoSuchPropertyException.class)
-    public void testGetLongArrayPropertyInvalidKey() {
+    public void testGetLongArrayProperty_InvalidKey() {
         configuration.getLongArrayProperty("invalid");
     }
 
@@ -267,12 +306,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetLongArrayPropertyWithDefaultNullKey() {
+    public void testGetLongArrayPropertyWithDefault_NullKey() {
         configuration.getLongArrayProperty(null);
     }
 
     @Test
-    public void testGetLongArrayPropertyWithDefaultInvalidKey() {
+    public void testGetLongArrayPropertyWithDefault_InvalidKey() {
         Assert.assertArrayEquals(new long[0], configuration.getLongArrayProperty("invalid", new long[0]));
     }
 
@@ -283,12 +322,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetFloatArrayPropertyNullKey() {
+    public void testGetFloatArrayProperty_NullKey() {
         configuration.getFloatArrayProperty(null);
     }
 
     @Test(expected = NoSuchPropertyException.class)
-    public void testGetFloatArrayPropertyInvalidKey() {
+    public void testGetFloatArrayProperty_InvalidKey() {
         configuration.getFloatArrayProperty("invalid");
     }
 
@@ -299,12 +338,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetFloatArrayPropertyWithDefaultNullKey() {
+    public void testGetFloatArrayPropertyWithDefault_NullKey() {
         configuration.getFloatArrayProperty(null);
     }
 
     @Test
-    public void testGetFloatArrayPropertyWithDefaultInvalidKey() {
+    public void testGetFloatArrayPropertyWithDefault_InvalidKey() {
         Assert.assertArrayEquals(new float[0], configuration.getFloatArrayProperty("invalid", new float[0]), 1e-8f);
     }
 
@@ -315,12 +354,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetDoubleArrayPropertyNullKey() {
+    public void testGetDoubleArrayProperty_NullKey() {
         configuration.getDoubleArrayProperty(null);
     }
 
     @Test(expected = NoSuchPropertyException.class)
-    public void testGetDoubleArrayPropertyInvalidKey() {
+    public void testGetDoubleArrayProperty_InvalidKey() {
         configuration.getDoubleArrayProperty("invalid");
     }
 
@@ -331,12 +370,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetDoubleArrayPropertyWithDefaultNullKey() {
+    public void testGetDoubleArrayPropertyWithDefault_NullKey() {
         configuration.getDoubleArrayProperty(null);
     }
 
     @Test
-    public void testGetDoubleArrayPropertyWithDefaultInvalidKey() {
+    public void testGetDoubleArrayPropertyWithDefault_InvalidKey() {
         Assert.assertArrayEquals(new double[0], configuration.getDoubleArrayProperty("invalid", new double[0]), 1e-8);
     }
 
@@ -347,12 +386,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetStringListPropertyNullKey() {
+    public void testGetStringListProperty_NullKey() {
         configuration.getStringListProperty(null);
     }
 
     @Test(expected = NoSuchPropertyException.class)
-    public void testGetStringListPropertyInvalidKey() {
+    public void testGetStringListProperty_InvalidKey() {
         configuration.getStringListProperty("invalid");
     }
 
@@ -363,12 +402,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetStringListPropertyWithDefaultNullKey() {
+    public void testGetStringListPropertyWithDefault_NullKey() {
         configuration.getStringListProperty(null);
     }
 
     @Test
-    public void testGetStringListPropertyWithDefaultInvalidKey() {
+    public void testGetStringListPropertyWithDefault_InvalidKey() {
         Assert.assertEquals(new ArrayList<String>(),
                 configuration.getStringListProperty("invalid", new ArrayList<String>()));
     }
@@ -380,12 +419,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetIntegerListPropertyNullKey() {
+    public void testGetIntegerListProperty_NullKey() {
         configuration.getIntegerListProperty(null);
     }
 
     @Test(expected = NoSuchPropertyException.class)
-    public void testGetIntegerListPropertyInvalidKey() {
+    public void testGetIntegerListProperty_InvalidKey() {
         configuration.getIntegerListProperty("invalid");
     }
 
@@ -396,12 +435,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetIntegerListPropertyWithDefaultNullKey() {
+    public void testGetIntegerListPropertyWithDefault_NullKey() {
         configuration.getIntegerListProperty(null);
     }
 
     @Test
-    public void testGetIntegerListPropertyWithDefaultInvalidKey() {
+    public void testGetIntegerListPropertyWithDefault_InvalidKey() {
         Assert.assertEquals(new ArrayList<Integer>(),
                 configuration.getIntegerListProperty("invalid", new ArrayList<Integer>()));
     }
@@ -413,12 +452,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetLongListPropertyNullKey() {
+    public void testGetLongListProperty_NullKey() {
         configuration.getLongListProperty(null);
     }
 
     @Test(expected = NoSuchPropertyException.class)
-    public void testGetLongListPropertyInvalidKey() {
+    public void testGetLongListProperty_InvalidKey() {
         configuration.getLongListProperty("invalid");
     }
 
@@ -429,12 +468,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetLongListPropertyWithDefaultNullKey() {
+    public void testGetLongListPropertyWithDefault_NullKey() {
         configuration.getLongListProperty(null);
     }
 
     @Test
-    public void testGetLongListPropertyWithDefaultInvalidKey() {
+    public void testGetLongListPropertyWithDefault_InvalidKey() {
         Assert.assertEquals(new ArrayList<Long>(), configuration.getLongListProperty("invalid", new ArrayList<Long>()));
     }
 
@@ -445,12 +484,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetFloatListPropertyNullKey() {
+    public void testGetFloatListProperty_NullKey() {
         configuration.getFloatListProperty(null);
     }
 
     @Test(expected = NoSuchPropertyException.class)
-    public void testGetFloatListPropertyInvalidKey() {
+    public void testGetFloatListProperty_InvalidKey() {
         configuration.getFloatListProperty("invalid");
     }
 
@@ -461,12 +500,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetFloatListPropertyWithDefaultNullKey() {
+    public void testGetFloatListPropertyWithDefault_NullKey() {
         configuration.getFloatListProperty(null);
     }
 
     @Test
-    public void testGetFloatListPropertyWithDefaultInvalidKey() {
+    public void testGetFloatListPropertyWithDefault_InvalidKey() {
         Assert.assertEquals(new ArrayList<Float>(),
                 configuration.getFloatListProperty("invalid", new ArrayList<Float>()));
     }
@@ -478,12 +517,12 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetDoubleListPropertyNullKey() {
+    public void testGetDoubleListProperty_NullKey() {
         configuration.getDoubleListProperty(null);
     }
 
     @Test(expected = NoSuchPropertyException.class)
-    public void testGetDoubleListPropertyInvalidKey() {
+    public void testGetDoubleListProperty_InvalidKey() {
         configuration.getDoubleListProperty("invalid");
     }
 
@@ -494,29 +533,74 @@ public class AbstractConfigurationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testGetDoubleListPropertyWithDefaultNullKey() {
+    public void testGetDoubleListPropertyWithDefault_NullKey() {
         configuration.getDoubleListProperty(null);
     }
 
     @Test
-    public void testGetDoubleListPropertyWithDefaultInvalidKey() {
+    public void testGetDoubleListPropertyWithDefault_InvalidKey() {
         Assert.assertEquals(new ArrayList<Double>(),
                 configuration.getDoubleListProperty("invalid", new ArrayList<Double>()));
     }
 
     @Test
-    public void testListPropertyKeys() {
+    public void testGetKeySet() {
         Assert.assertThat(configuration.getKeySet(),
                 Matchers.containsInAnyOrder("String", "int", "long", "float", "double", "String[]", "int[]", "long[]",
                         "float[]", "double[]", "List<String>", "List<Integer>", "List<Long>", "List<Float>",
-                        "List<Double>"));
+                        "List<Double>", "other"));
     }
 
     @Test
-    public void testGetEntryList() {
+    public void testGetItemMap() {
         Assert.assertThat(configuration.getItemMap().keySet(),
                 Matchers.containsInAnyOrder("String", "int", "long", "float", "double", "String[]", "int[]", "long[]",
                         "float[]", "double[]", "List<String>", "List<Integer>", "List<Long>", "List<Float>",
-                        "List<Double>"));
+                        "List<Double>", "other"));
+    }
+
+    @Test
+    public void testReload() {
+        valueMap.put("int", "0");
+        configuration.reload();
+        Assert.assertEquals(0, configuration.getIntProperty("int"));
+    }
+
+    @Test
+    public void testReload_MultipleThreads() throws InterruptedException {
+        List<Runnable> taskList = new ArrayList<Runnable>();
+        for (int i = 0; i < 1000; ++i) {
+            final int index = i;
+            taskList.add(new Runnable() {
+                public void run() {
+                    long hash = 0;
+                    for (int k = 0; k < 100; ++k) {
+                        for (int i = 0; i < 100; ++i) {
+                            valueMap.put("key_" + i, "value_" + index);
+                        }
+                        configuration.reload();
+                        for (int i = 0; i < 100; ++i) {
+                            hash |= configuration.getProperty("key_" + i).hashCode();
+                        }
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                        }
+                    }
+                    if (hash == 0) {
+                        throw new RuntimeException("Unexpected");
+                    }
+                }
+            });
+        }
+        TestUtils.assertConcurrent("reload_MultipleThreads", taskList, 10);
+    }
+
+    @Test
+    public void testClone() {
+        Configuration config = this.configuration.clone();
+        valueMap.put("int", "0");
+        configuration.reload();
+        Assert.assertNotEquals(0, config.getIntProperty("int"));
     }
 }

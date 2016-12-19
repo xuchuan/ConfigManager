@@ -14,6 +14,7 @@ public abstract class AbstractConfiguration implements Configuration {
     protected Map<String, ConfigItem> itemMap = new HashMap<String, ConfigItem>();
 
     public AbstractConfiguration(String name, Configuration baseConfig) {
+        Utils.checkNotEmptyStringAfterTrim("name", name);
         this.name = name;
         this.baseConfig = baseConfig;
     }
@@ -248,7 +249,9 @@ public abstract class AbstractConfiguration implements Configuration {
     public Configuration clone() {
         try {
             AbstractConfiguration newConfig = (AbstractConfiguration) super.clone();
-            newConfig.baseConfig = baseConfig.clone(); // base config MUST be cloned after self clone
+            if (baseConfig != null) {
+                newConfig.baseConfig = baseConfig.clone(); // base config MUST be cloned after self clone
+            }
             return newConfig;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);

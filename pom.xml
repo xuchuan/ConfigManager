@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.xuchuan.common</groupId>
-    <artifactId>ConfigManager</artifactId>
+    <artifactId>GaiaConfig</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>ConfigManager</name>
+    <name>GaiaConfig</name>
     <description>Common configuration management</description>
-    <url>https://github.com/xuchuan/config-manager-java</url>
+    <url>https://github.com/xuchuan/gaia-config-java</url>
 
     <scm>
-        <url>https://github.com/xuchuan/config-manager-java.git</url>
+        <url>https://github.com/xuchuan/gaia-config-java.git</url>
     </scm>
 
     <licenses>

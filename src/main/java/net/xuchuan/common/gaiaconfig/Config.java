@@ -1,10 +1,10 @@
-package net.xuchuan.common.configmanager;
+package net.xuchuan.common.gaiaconfig;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface Configuration extends Cloneable {
+public interface Config extends Cloneable {
     String getProperty(String key);
 
     String getProperty(String key, String defaultValue);
@@ -71,5 +71,5 @@ public interface Configuration extends Cloneable {
 
     void reload();
 
-    Configuration clone();
+    Config clone();
 }

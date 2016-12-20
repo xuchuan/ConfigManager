@@ -1,4 +1,4 @@
-package net.xuchuan.common.configmanager;
+package net.xuchuan.common.gaiaconfig;
 
 import org.junit.Assert;
 import org.junit.Before;

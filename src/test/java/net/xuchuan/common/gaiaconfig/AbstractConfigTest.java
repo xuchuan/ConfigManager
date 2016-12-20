@@ -1,4 +1,4 @@
-package net.xuchuan.common.configmanager;
+package net.xuchuan.common.gaiaconfig;
 
 import org.hamcrest.Matchers;
 import org.junit.Assert;
@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AbstractConfigurationTest {
-    private AbstractConfiguration configuration;
+public class AbstractConfigTest {
+    private AbstractConfig configuration;
     private Map<String, String> valueMap;
-    private Map<String, String> otherMap;
+    private Map<String, String> baseMap;
 
     @Before
     public void setUp() {
@@ -35,10 +35,11 @@ public class AbstractConfigurationTest {
         valueMap.put("List<Long>", "0,1,2,3,4,12345678900");
         valueMap.put("List<Float>", "0.1,1.2,2.3,3.4,4.5");
         valueMap.put("List<Double>", "0.1,1.2,2.3,3.4,4.5");
-        otherMap = new HashMap<String, String>();
-        otherMap.put("other", "otherValue");
-        configuration = new MapConfiguration("test", valueMap,
-                new MapConfiguration("other", otherMap));
+        baseMap = new HashMap<String, String>();
+        baseMap.put("base", "baseValue");
+        baseMap.put("String", "");
+        configuration = new MapConfig("test", valueMap,
+                new MapConfig("base", baseMap));
     }
 
     @Test
@@ -49,22 +50,22 @@ public class AbstractConfigurationTest {
 
     @Test(expected = NullPointerException.class)
     public void testConstructor_NullName() {
-        new MapConfiguration(null);
+        new MapConfig(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructor_EmptyName() {
-        new MapConfiguration("");
+        new MapConfig("");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructor_WhiteSpaceName() {
-        new MapConfiguration(" \t");
+        new MapConfig(" \t");
     }
 
     @Test
     public void testConstructor_NullBaseConfig() {
-        configuration = new MapConfiguration("test");
+        configuration = new MapConfig("test");
         Assert.assertNull(configuration.getBaseConfig());
     }
 
@@ -75,7 +76,7 @@ public class AbstractConfigurationTest {
 
     @Test
     public void testGetProperty_FromBaseConfig() {
-        Assert.assertEquals("otherValue", configuration.getProperty("other"));
+        Assert.assertEquals("baseValue", configuration.getProperty("base"));
     }
 
     @Test(expected = NullPointerException.class)
@@ -548,7 +549,7 @@ public class AbstractConfigurationTest {
         Assert.assertThat(configuration.getKeySet(),
                 Matchers.containsInAnyOrder("String", "int", "long", "float", "double", "String[]", "int[]", "long[]",
                         "float[]", "double[]", "List<String>", "List<Integer>", "List<Long>", "List<Float>",
-                        "List<Double>", "other"));
+                        "List<Double>", "base"));
     }
 
     @Test
@@ -556,14 +557,16 @@ public class AbstractConfigurationTest {
         Assert.assertThat(configuration.getItemMap().keySet(),
                 Matchers.containsInAnyOrder("String", "int", "long", "float", "double", "String[]", "int[]", "long[]",
                         "float[]", "double[]", "List<String>", "List<Integer>", "List<Long>", "List<Float>",
-                        "List<Double>", "other"));
+                        "List<Double>", "base"));
     }
 
     @Test
     public void testReload() {
         valueMap.put("int", "0");
+        valueMap.remove("String");
         configuration.reload();
         Assert.assertEquals(0, configuration.getIntProperty("int"));
+        Assert.assertEquals("", configuration.getProperty("String"));
     }
 
     @Test
@@ -598,7 +601,7 @@ public class AbstractConfigurationTest {
 
     @Test
     public void testClone() {
-        Configuration config = this.configuration.clone();
+        Config config = this.configuration.clone();
         valueMap.put("int", "0");
         configuration.reload();
         Assert.assertNotEquals(0, config.getIntProperty("int"));

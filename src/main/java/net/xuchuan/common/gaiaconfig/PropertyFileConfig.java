@@ -1,18 +1,18 @@
-package net.xuchuan.common.configmanager;
+package net.xuchuan.common.gaiaconfig;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-public class PropertyFileConfiguration extends AbstractConfiguration {
+public class PropertyFileConfig extends AbstractConfig {
     private File configFile;
 
-    public PropertyFileConfiguration(File configFile) {
+    public PropertyFileConfig(File configFile) {
         this(configFile, null);
     }
 
-    public PropertyFileConfiguration(File configFile, Configuration baseConfig) {
+    public PropertyFileConfig(File configFile, Config baseConfig) {
         super(configFile.getPath() + File.separator + configFile.getName(), baseConfig);
         Utils.checkNotNull("configFile", configFile);
         this.configFile = configFile;

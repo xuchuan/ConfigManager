@@ -1,24 +1,24 @@
-package net.xuchuan.common.configmanager;
+package net.xuchuan.common.gaiaconfig;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class MapConfiguration extends AbstractConfiguration {
+public class MapConfig extends AbstractConfig {
     private Map<String, String> valueMap;
 
-    public MapConfiguration(String name) {
+    public MapConfig(String name) {
         this(name, new HashMap<String, String>(), null);
     }
 
-    public MapConfiguration(String name, Map<String, String> valueMap) {
+    public MapConfig(String name, Map<String, String> valueMap) {
         this(name, valueMap, null);
     }
 
-    public MapConfiguration(String name, Configuration baseConfig) {
+    public MapConfig(String name, Config baseConfig) {
         this(name, new HashMap<String, String>(), baseConfig);
     }
 
-    public MapConfiguration(String name, Map<String, String> valueMap, Configuration baseConfig) {
+    public MapConfig(String name, Map<String, String> valueMap, Config baseConfig) {
         super(name, baseConfig);
         Utils.checkNotNull("valueMap", valueMap);
         this.valueMap = valueMap;

@@ -1,4 +1,4 @@
-package net.xuchuan.common.configmanager;
+package net.xuchuan.common.gaiaconfig;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-public abstract class AbstractConfiguration implements Configuration {
-    protected Configuration baseConfig;
+public abstract class AbstractConfig implements Config {
+    protected Config baseConfig;
     protected String name;
-    protected Map<String, ConfigItem> itemMap = new HashMap<String, ConfigItem>();
+    protected volatile Map<String, ConfigItem> itemMap = new HashMap<String, ConfigItem>();
 
-    public AbstractConfiguration(String name, Configuration baseConfig) {
+    public AbstractConfig(String name, Config baseConfig) {
         Utils.checkNotEmptyStringAfterTrim("name", name);
         this.name = name;
         this.baseConfig = baseConfig;
@@ -222,7 +222,7 @@ public abstract class AbstractConfiguration implements Configuration {
         return keySet;
     }
 
-    public Configuration getBaseConfig() {
+    public Config getBaseConfig() {
         return baseConfig;
     }
 
@@ -246,9 +246,9 @@ public abstract class AbstractConfiguration implements Configuration {
         doReload();
     }
 
-    public Configuration clone() {
+    public Config clone() {
         try {
-            AbstractConfiguration newConfig = (AbstractConfiguration) super.clone();
+            AbstractConfig newConfig = (AbstractConfig) super.clone();
             if (baseConfig != null) {
                 newConfig.baseConfig = baseConfig.clone(); // base config MUST be cloned after self clone
             }
@@ -261,35 +261,41 @@ public abstract class AbstractConfiguration implements Configuration {
     protected abstract void doReload();
 
     protected void doReloadFromMap(Map<String, String> valueMap) {
-        Map<String, ConfigItem> newItemMap = new HashMap<String, ConfigItem>(itemMap);
+        Map<String, ConfigItem> oldItemMap = itemMap;
+        Map<String, ConfigItem> newItemMap = new HashMap<String, ConfigItem>();
         boolean valueChanged = false;
         for (Map.Entry<String, String> entry : valueMap.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            ConfigItem item = newItemMap.get(key);
+            ConfigItem item = oldItemMap.get(key);
             if (item == null || !item.getValue().equals(value)) {
                 newItemMap.put(key, new ConfigItem(key, value, name, new Date()));
                 valueChanged = true;
+            } else {
+                newItemMap.put(key, item);
             }
         }
-        if (valueChanged) {
+        if (valueChanged || newItemMap.size() != oldItemMap.size()) {
             itemMap = newItemMap;
         }
     }
 
     protected void doReloadFromProperties(Properties properties) {
-        Map<String, ConfigItem> newItemMap = new HashMap<String, ConfigItem>(itemMap);
+        Map<String, ConfigItem> oldItemMap = itemMap;
+        Map<String, ConfigItem> newItemMap = new HashMap<String, ConfigItem>();
         boolean valueChanged = false;
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
             String key = (String) entry.getKey();
             String value = (String) entry.getValue();
-            ConfigItem item = newItemMap.get(key);
+            ConfigItem item = oldItemMap.get(key);
             if (item == null || !item.getValue().equals(value)) {
                 newItemMap.put(key, new ConfigItem(key, value, name, new Date()));
                 valueChanged = true;
+            } else {
+                newItemMap.put(key, item);
             }
         }
-        if (valueChanged) {
+        if (valueChanged || newItemMap.size() != oldItemMap.size()) {
             itemMap = newItemMap;
         }
     }
